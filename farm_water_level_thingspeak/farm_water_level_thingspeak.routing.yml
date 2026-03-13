@@ -1,0 +1,15 @@
+farm_water_level_thingspeak.settings:
+  path: '/farm/water-level/settings'
+  defaults:
+    _form: '\Drupal\farm_water_level_thingspeak\Form\SettingsForm'
+    _title: 'Water Level ThingSpeak Settings'
+  requirements:
+    _permission: 'administer farm_water_level_thingspeak'
+
+farm_water_level_thingspeak.sync:
+  path: '/farm/water-level/sync'
+  defaults:
+    _controller: '\Drupal\farm_water_level_thingspeak\Controller\SyncController::sync'
+    _title: 'Sync Water Level Data'
+  requirements:
+    _permission: 'administer farm_water_level_thingspeak'

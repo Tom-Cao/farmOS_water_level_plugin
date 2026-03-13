@@ -1,0 +1,9 @@
+services:
+  farm_water_level_thingspeak.thingspeak_service:
+    class: Drupal\farm_water_level_thingspeak\Service\ThingSpeakService
+    arguments:
+      - '@http_client'
+      - '@config.factory'
+      - '@logger.factory'
+      - '@entity_type.manager'
+      - '@state'

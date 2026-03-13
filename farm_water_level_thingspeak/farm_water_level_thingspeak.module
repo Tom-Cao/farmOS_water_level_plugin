@@ -1,0 +1,29 @@
+<?php
+
+/**
+ * @file
+ * farmOS Water Level ThingSpeak module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function farm_water_level_thingspeak_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.farm_water_level_thingspeak':
+      return '<p>' . t('Connects to ThingSpeak to import water level sensor data into farmOS as observation logs. Configure the ThingSpeak channel and API key in the <a href=":settings">settings page</a>.', [
+        ':settings' => \Drupal::url('farm_water_level_thingspeak.settings'),
+      ]) . '</p>';
+  }
+}
+
+/**
+ * Implements hook_cron().
+ */
+function farm_water_level_thingspeak_cron() {
+  /** @var \Drupal\farm_water_level_thingspeak\Service\ThingSpeakService $service */
+  $service = \Drupal::service('farm_water_level_thingspeak.thingspeak_service');
+  $service->syncData();
+}

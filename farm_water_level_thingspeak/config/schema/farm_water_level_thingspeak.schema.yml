@@ -1,0 +1,22 @@
+farm_water_level_thingspeak.settings:
+  type: config_object
+  label: 'Water Level ThingSpeak Settings'
+  mapping:
+    channel_id:
+      type: string
+      label: 'ThingSpeak Channel ID'
+    api_key:
+      type: string
+      label: 'ThingSpeak Read API Key'
+    water_level_field:
+      type: string
+      label: 'Water Level Field'
+    sync_interval:
+      type: integer
+      label: 'Sync Interval (seconds)'
+    units:
+      type: string
+      label: 'Units'
+    log_name_prefix:
+      type: string
+      label: 'Log Name Prefix'
