@@ -1,0 +1,6 @@
+channel_id: ''
+api_key: ''
+water_level_field: 'field1'
+sync_interval: 900
+units: 'm'
+log_name_prefix: 'Water Level'

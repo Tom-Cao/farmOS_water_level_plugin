@@ -1,0 +1,4 @@
+administer farm_water_level_thingspeak:
+  title: 'Administer farmOS Water Level ThingSpeak'
+  description: 'Configure and manage the ThingSpeak water level integration.'
+  restrict access: TRUE

@@ -1,0 +1,9 @@
+name: 'farmOS Water Level (ThingSpeak)'
+type: module
+description: 'Connects to ThingSpeak to import water level sensor data into farmOS as observation logs.'
+package: 'farmOS'
+core_version_requirement: ^9.4 || ^10 || ^11
+dependencies:
+  - drupal:system
+  - farm:farm_log_observation
+  - farm:farm_quantity_standard

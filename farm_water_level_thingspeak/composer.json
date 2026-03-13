@@ -1,0 +1,30 @@
+{
+  "name": "farm/farm-water-level-thingspeak",
+  "type": "drupal-module",
+  "description": "farmOS plugin that connects to ThingSpeak to import water level sensor data as observation logs.",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=8.1",
+    "drupal/core": "^9.4 || ^10 || ^11"
+  },
+  "require-dev": {
+    "phpspec/prophecy-phpunit": "^2"
+  },
+  "autoload": {
+    "psr-4": {
+      "Drupal\\farm_water_level_thingspeak\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Drupal\\Tests\\farm_water_level_thingspeak\\": "tests/src/"
+    }
+  },
+  "extra": {
+    "drush": {
+      "services": {
+        "drush.services.yml": "^10 || ^11 || ^12"
+      }
+    }
+  }
+}

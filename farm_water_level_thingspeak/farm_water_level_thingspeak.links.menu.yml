@@ -1,0 +1,6 @@
+farm_water_level_thingspeak.settings:
+  title: 'Water Level Settings'
+  description: 'Configure ThingSpeak integration for water level monitoring.'
+  route_name: farm_water_level_thingspeak.settings
+  parent: farm.settings
+  weight: 10
