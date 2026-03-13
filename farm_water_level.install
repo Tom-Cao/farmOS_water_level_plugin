@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for the farm_water_level module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function farm_water_level_install() {
+  \Drupal::messenger()->addStatus(t('Water Level Sensor module has been installed.'));
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function farm_water_level_uninstall() {
+  \Drupal::messenger()->addStatus(t('Water Level Sensor module has been uninstalled.'));
+}

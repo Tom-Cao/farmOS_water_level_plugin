@@ -1,0 +1,43 @@
+<?php
+
+/**
+ * @file
+ * Contains farm_water_level.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function farm_water_level_help($route_name, RouteMatchInterface $route_match) {
+  $output = '';
+  switch ($route_name) {
+    case 'help.page.farm_water_level':
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Provides a water level sensor log type for farmOS, allowing recording and tracking of water level readings.') . '</p>';
+      $output .= '<h3>' . t('Usage') . '</h3>';
+      $output .= '<p>' . t('Navigate to Logs > Add log > Water level to create a new water level reading. You can associate readings with assets, record quantity measurements, and attach location data.') . '</p>';
+      break;
+  }
+  return $output;
+}
+
+/**
+ * Implements hook_farm_entity_bundle_field_info().
+ */
+function farm_water_level_farm_entity_bundle_field_info() {
+  $fields = [];
+
+  $fields['log']['water_level']['sensor_depth'] = [
+    'type' => 'fraction',
+    'label' => t('Sensor depth'),
+    'description' => t('The installation depth of the water level sensor.'),
+    'weight' => [
+      'form' => 15,
+      'view' => 15,
+    ],
+  ];
+
+  return $fields;
+}

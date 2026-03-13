@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - farm_water_level
+id: log.water_level.geometry
+type: geofield
+label: Geometry
+description: 'The location of the water level sensor.'
+required: false
+multiple: false
+weight: 10
+view_display_options:
+  label: inline
+  type: geofield_default
+  weight: 10
+form_display_options:
+  type: geofield_default
+  weight: 10

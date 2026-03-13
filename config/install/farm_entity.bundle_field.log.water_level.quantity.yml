@@ -1,0 +1,38 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - farm_water_level
+id: log.water_level.quantity
+type: entity_reference
+label: Quantity
+description: 'The quantity measurements for this water level reading.'
+required: false
+multiple: true
+target_type: quantity
+target_bundle: standard
+handler: default:quantity
+handler_settings: {  }
+weight: 5
+view_display_options:
+  label: inline
+  type: entity_reference_label
+  weight: 5
+  settings:
+    link: true
+form_display_options:
+  type: inline_entity_form_complex
+  weight: 5
+  settings:
+    form_mode: default
+    override_labels: false
+    label_singular: ''
+    label_plural: ''
+    allow_new: true
+    allow_existing: false
+    match_operator: CONTAINS
+    revision: true
+    collapsible: false
+    collapsed: false
+    allow_duplicate: false

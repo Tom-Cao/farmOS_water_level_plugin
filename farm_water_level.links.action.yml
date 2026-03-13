@@ -1,0 +1,7 @@
+farm_water_level.add:
+  route_name: entity.log.add_form
+  route_parameters:
+    log_type: water_level
+  title: 'Water level'
+  appears_on:
+    - view.farm_log.page

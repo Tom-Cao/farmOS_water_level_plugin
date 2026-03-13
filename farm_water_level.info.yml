@@ -1,0 +1,13 @@
+name: Water Level Sensor
+description: Provides a water level sensor log type and related functionality for farmOS.
+type: module
+package: farmOS Contrib
+core_version_requirement: ^10 || ^11
+dependencies:
+  - farm:farm_entity
+  - farm:farm_field
+  - farm:farm_log
+  - farm:farm_log_quantity
+  - farm:farm_quantity_standard
+  - log:log
+  - quantity:quantity

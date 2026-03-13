@@ -1,0 +1,3 @@
+administer farm_water_level:
+  title: 'Administer water level sensor settings'
+  description: 'Configure water level sensor module settings.'

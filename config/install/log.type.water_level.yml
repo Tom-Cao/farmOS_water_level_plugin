@@ -1,0 +1,12 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - farm_water_level
+id: water_level
+label: Water level
+description: 'Records a water level sensor reading.'
+name_pattern: 'Water level reading [log:timestamp:short]'
+workflow: farm_default
+new_revision: true

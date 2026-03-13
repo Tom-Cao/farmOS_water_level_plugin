@@ -1,0 +1,23 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - farm_water_level
+id: log.water_level.notes
+type: text_long
+label: Notes
+description: 'Additional notes about this water level reading.'
+required: false
+multiple: false
+weight: 20
+view_display_options:
+  label: inline
+  type: text_default
+  weight: 20
+form_display_options:
+  type: text_textarea
+  weight: 20
+  settings:
+    rows: 5
+    placeholder: ''
