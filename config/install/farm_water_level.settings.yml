@@ -1,0 +1,5 @@
+thingspeak_channel_id: ''
+thingspeak_read_api_key: ''
+thingspeak_field_number: 1
+sync_interval: 3600
+results_to_fetch: 100

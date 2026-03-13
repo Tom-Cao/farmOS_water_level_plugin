@@ -1,0 +1,15 @@
+farm_water_level.settings:
+  path: '/admin/config/farm/water-level'
+  defaults:
+    _form: '\Drupal\farm_water_level\Form\ThingSpeakSettingsForm'
+    _title: 'Water Level Sensor Settings'
+  requirements:
+    _permission: 'administer farm_water_level'
+
+farm_water_level.dashboard:
+  path: '/farm/water-level'
+  defaults:
+    _controller: '\Drupal\farm_water_level\Controller\WaterLevelController::dashboard'
+    _title: 'Water Level'
+  requirements:
+    _permission: 'access content'

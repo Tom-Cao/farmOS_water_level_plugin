@@ -1,19 +1,26 @@
 # Farm Water Level Sensor
 
-A [farmOS](https://farmOS.org) module that provides a **Water Level** log type for recording and tracking water level sensor readings.
+A [farmOS](https://farmOS.org) module that integrates with [ThingSpeak](https://thingspeak.com/) to pull water level sensor data and display it within farmOS.
+
+## How it works
+
+1. A physical water level sensor sends readings to a ThingSpeak channel.
+2. This module reads that data via the ThingSpeak Read API.
+3. Readings are displayed on a dashboard at `/farm/water-level`.
+4. On cron, new readings are automatically synced and stored as farmOS **Water Level** logs with quantity measurements.
 
 ## Features
 
-- **Water Level log type** — dedicated log type for recording water level observations
-- **Quantity tracking** — attach standard quantity measurements (depth, volume, etc.) to each reading
-- **Asset association** — link readings to specific sensor assets or water sources
-- **Geometry/location** — record the geographic location of sensor installations
-- **Sensor depth field** — store the installation depth of the sensor itself
+- **ThingSpeak integration** — connects to any ThingSpeak channel using a Read API key
+- **Live dashboard** — view the latest reading and a table of recent data at `/farm/water-level`
+- **Automatic sync** — cron pulls new readings and creates Water Level log entities with quantities
+- **Configurable** — set channel ID, API key, field number, sync interval, and batch size from the admin UI
 
 ## Requirements
 
 - [farmOS](https://farmOS.org) 3.x
 - Drupal 10 or 11
+- A ThingSpeak channel with water level sensor data
 
 ## Installation
 
@@ -21,58 +28,58 @@ A [farmOS](https://farmOS.org) module that provides a **Water Level** log type f
 
 ```bash
 composer require drupal/farm_water_level
-```
-
-Then enable the module:
-
-```bash
 drush en farm_water_level
 ```
 
-### Manual installation
+### Manual
 
-1. Clone or download this repository into your farmOS modules directory:
-   - Docker: `/opt/drupal/web/modules/`
-   - Or the `modules` directory of your server's document root
-2. Enable the module via the Drupal admin UI at **Extend** or with Drush:
-   ```bash
-   drush en farm_water_level
-   ```
+1. Place this module in your farmOS modules directory (`/opt/drupal/web/modules/` in Docker).
+2. Enable: `drush en farm_water_level`
+
+## Configuration
+
+1. Go to **Administration > Configuration > System > Water Level Sensor** (`/admin/config/farm/water-level`).
+2. Enter your **ThingSpeak Channel ID**.
+3. Enter your **ThingSpeak Read API Key** (required for private channels).
+4. Adjust the **Sync Interval** and **Results per Request** as needed.
+5. Save.
 
 ## Usage
 
-1. Navigate to **Logs > Add log > Water level** to create a new water level reading.
-2. Associate the reading with an asset (e.g., a well, pond, or sensor device).
-3. Add quantity measurements for the water level (depth in meters, feet, etc.).
-4. Optionally set the geometry for the sensor location and add notes.
+- Visit `/farm/water-level` to see the current reading and recent history.
+- Water level logs are created automatically during cron and appear under **Logs** in farmOS.
+- Each log includes a quantity measurement (in cm) for the water level value.
 
 ## Module structure
 
 ```
 farm_water_level/
-├── farm_water_level.info.yml          # Module definition
-├── farm_water_level.module            # Hook implementations
-├── farm_water_level.install           # Install/uninstall hooks
-├── farm_water_level.permissions.yml   # Custom permissions
-├── farm_water_level.links.action.yml  # Action links
-├── composer.json                      # Composer metadata
+├── farm_water_level.info.yml              # Module definition
+├── farm_water_level.module                # Hooks (help, cron, bundle fields)
+├── farm_water_level.install               # Install/uninstall hooks
+├── farm_water_level.routing.yml           # Routes (settings form, dashboard)
+├── farm_water_level.services.yml          # Service definitions
+├── farm_water_level.permissions.yml       # Permissions
+├── farm_water_level.links.menu.yml        # Menu links
+├── farm_water_level.links.action.yml      # Action links
+├── composer.json                          # Composer metadata
 ├── config/
-│   └── install/                       # Config entities installed with the module
-│       ├── log.type.water_level.yml
-│       ├── farm_entity.bundle_field.log.water_level.asset.yml
-│       ├── farm_entity.bundle_field.log.water_level.quantity.yml
-│       ├── farm_entity.bundle_field.log.water_level.geometry.yml
-│       ├── farm_entity.bundle_field.log.water_level.notes.yml
-│       └── system.action.log_water_level.yml
+│   ├── install/
+│   │   ├── farm_water_level.settings.yml  # Default config values
+│   │   ├── log.type.water_level.yml       # Water level log type
+│   │   └── farm_entity.bundle_field.*.yml # Field definitions
+│   └── schema/
+│       └── farm_water_level.schema.yml    # Config schema
 └── src/
+    ├── ThingSpeakClient.php               # ThingSpeak Read API client service
+    ├── Controller/
+    │   └── WaterLevelController.php       # Dashboard controller
+    ├── Form/
+    │   └── ThingSpeakSettingsForm.php      # Admin settings form
     └── Plugin/Log/LogType/
-        └── WaterLevel.php             # Log type plugin class
+        └── WaterLevel.php                 # Log type plugin
 ```
-
-## Development
-
-For local development, refer to the [farmOS development environment](https://farmOS.org/development/environment/) documentation to set up a Docker-based dev instance.
 
 ## License
 
-This module is licensed under the [GNU General Public License, version 2 or later](https://www.gnu.org/licenses/gpl-2.0.html).
+GNU General Public License, version 2 or later.

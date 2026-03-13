@@ -3,7 +3,7 @@
   "description": "A farmOS module for water level sensor readings and monitoring.",
   "type": "drupal-module",
   "license": "GPL-2.0-or-later",
-  "homepage": "https://github.com/aalok-sud/farmOS_water_level_plugin",
+  "homepage": "https://github.com/Tom-Cao/farmOS_water_level_plugin",
   "require": {
     "drupal/core": "^10 || ^11",
     "drupal/farm": "^3"

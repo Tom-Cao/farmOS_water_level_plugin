@@ -1,0 +1,13 @@
+farm_water_level.settings:
+  title: 'Water Level Sensor'
+  description: 'Configure ThingSpeak integration for the water level sensor.'
+  route_name: farm_water_level.settings
+  parent: system.admin_config_system
+  weight: 50
+
+farm_water_level.dashboard:
+  title: 'Water Level'
+  description: 'View water level sensor readings.'
+  route_name: farm_water_level.dashboard
+  menu_name: farm
+  weight: 50

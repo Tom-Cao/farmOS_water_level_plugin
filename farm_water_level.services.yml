@@ -1,0 +1,11 @@
+services:
+  farm_water_level.thingspeak_client:
+    class: Drupal\farm_water_level\ThingSpeakClient
+    arguments:
+      - '@config.factory'
+      - '@http_client'
+      - '@logger.channel.farm_water_level'
+
+  logger.channel.farm_water_level:
+    parent: logger.channel_base
+    arguments: ['farm_water_level']

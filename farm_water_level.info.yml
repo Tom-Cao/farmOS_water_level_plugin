@@ -1,5 +1,5 @@
 name: Water Level Sensor
-description: Provides a water level sensor log type and related functionality for farmOS.
+description: Integrates ThingSpeak water level sensor data into farmOS, displaying readings and syncing them as logs.
 type: module
 package: farmOS Contrib
 core_version_requirement: ^10 || ^11
@@ -11,3 +11,4 @@ dependencies:
   - farm:farm_quantity_standard
   - log:log
   - quantity:quantity
+configure: farm_water_level.settings
