@@ -8,12 +8,28 @@ farm_water_level.settings:
     thingspeak_read_api_key:
       type: string
       label: 'ThingSpeak Read API Key'
-    thingspeak_field_number:
-      type: integer
-      label: 'ThingSpeak field number for water level'
     sync_interval:
       type: integer
       label: 'Sync interval in seconds'
     results_to_fetch:
       type: integer
       label: 'Number of results to fetch per request'
+    sensors:
+      type: sequence
+      label: 'Configured sensors'
+      sequence:
+        type: mapping
+        label: 'Sensor'
+        mapping:
+          name:
+            type: string
+            label: 'Sensor name'
+          field_number:
+            type: integer
+            label: 'ThingSpeak field number'
+          channel_id:
+            type: string
+            label: 'Per-sensor ThingSpeak Channel ID override'
+          read_api_key:
+            type: string
+            label: 'Per-sensor ThingSpeak Read API Key override'

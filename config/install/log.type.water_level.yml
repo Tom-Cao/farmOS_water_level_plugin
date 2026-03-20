@@ -8,5 +8,5 @@ id: water_level
 label: Water level
 description: 'Records a water level sensor reading.'
 name_pattern: 'Water level reading [log:timestamp:short]'
-workflow: farm_default
+workflow: farm_log_workflow
 new_revision: true

@@ -39,22 +39,36 @@ class ThingSpeakClient {
   }
 
   /**
-   * Fetches the latest feed entries from the configured ThingSpeak channel.
+   * Resolves channel ID and API key for a sensor, falling back to globals.
    *
+   * @return array{string, string}
+   *   [channel_id, api_key]
+   */
+  public function resolveChannel(array $sensor): array {
+    $channel_id = !empty($sensor['channel_id']) ? $sensor['channel_id'] : ($this->config->get('thingspeak_channel_id') ?: '');
+    $api_key = !empty($sensor['read_api_key']) ? $sensor['read_api_key'] : ($this->config->get('thingspeak_read_api_key') ?: '');
+    return [$channel_id, $api_key];
+  }
+
+  /**
+   * Fetches feed entries for a sensor.
+   *
+   * Uses the sensor's own channel/key if set, otherwise the global defaults.
+   *
+   * @param array $sensor
+   *   Sensor config with keys: field_number, and optionally channel_id, read_api_key.
    * @param int|null $results
-   *   Number of results to return. Falls back to configured default.
+   *   Number of results to return.
    *
    * @return array
-   *   Array of feed entries, each with 'created_at' and 'value' keys.
+   *   Array of feed entries, each with 'entry_id', 'created_at', 'value'.
    */
-  public function fetchFeed(?int $results = NULL): array {
-    $channel_id = $this->config->get('thingspeak_channel_id');
-    $api_key = $this->config->get('thingspeak_read_api_key');
-    $field_number = $this->config->get('thingspeak_field_number') ?: 1;
+  public function fetchForSensor(array $sensor, ?int $results = NULL): array {
+    [$channel_id, $api_key] = $this->resolveChannel($sensor);
+    $field_number = $sensor['field_number'] ?? 1;
     $results = $results ?? ($this->config->get('results_to_fetch') ?: 100);
 
     if (empty($channel_id)) {
-      $this->logger->warning('ThingSpeak channel ID is not configured.');
       return [];
     }
 
@@ -97,53 +111,9 @@ class ThingSpeakClient {
       return $entries;
     }
     catch (\Exception $e) {
-      $this->logger->error('Failed to fetch ThingSpeak data: @message', [
-        '@message' => $e->getMessage(),
-      ]);
-      return [];
-    }
-  }
-
-  /**
-   * Fetches the single most recent entry from the channel.
-   *
-   * @return array|null
-   *   The latest entry or NULL if unavailable.
-   */
-  public function fetchLatest(): ?array {
-    $entries = $this->fetchFeed(1);
-    return $entries[0] ?? NULL;
-  }
-
-  /**
-   * Fetches channel metadata from ThingSpeak.
-   *
-   * @return array
-   *   Channel metadata array, or empty array on failure.
-   */
-  public function fetchChannelInfo(): array {
-    $channel_id = $this->config->get('thingspeak_channel_id');
-    $api_key = $this->config->get('thingspeak_read_api_key');
-
-    if (empty($channel_id)) {
-      return [];
-    }
-
-    $url = sprintf('%s/channels/%s.json', self::BASE_URL, $channel_id);
-    $query = [];
-    if (!empty($api_key)) {
-      $query['api_key'] = $api_key;
-    }
-
-    try {
-      $response = $this->httpClient->request('GET', $url, [
-        'query' => $query,
-        'timeout' => 15,
-      ]);
-      return json_decode((string) $response->getBody(), TRUE) ?: [];
-    }
-    catch (\Exception $e) {
-      $this->logger->error('Failed to fetch ThingSpeak channel info: @message', [
+      $this->logger->error('Failed to fetch ThingSpeak channel @ch field @field: @message', [
+        '@ch' => $channel_id,
+        '@field' => $field_number,
         '@message' => $e->getMessage(),
       ]);
       return [];

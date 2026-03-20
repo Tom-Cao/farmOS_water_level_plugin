@@ -15,9 +15,9 @@ function farm_water_level_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.farm_water_level':
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('Pulls water level sensor data from ThingSpeak and displays it in farmOS. Readings are synced periodically and stored as water level logs.') . '</p>';
+      $output .= '<p>' . t('Pulls water level sensor data from ThingSpeak and displays it in farmOS. Supports multiple sensors, each with its own ThingSpeak channel.') . '</p>';
       $output .= '<h3>' . t('Configuration') . '</h3>';
-      $output .= '<p>' . t('Go to <a href=":url">Water Level Sensor Settings</a> to configure your ThingSpeak channel ID and Read API key.', [':url' => '/admin/config/farm/water-level']) . '</p>';
+      $output .= '<p>' . t('Go to <a href=":url">Water Level Sensor Settings</a> to add sensors and configure sync options.', [':url' => '/admin/config/farm/water-level']) . '</p>';
       break;
   }
   return $output;
@@ -26,7 +26,7 @@ function farm_water_level_help($route_name, RouteMatchInterface $route_match) {
 /**
  * Implements hook_cron().
  *
- * Fetches new water level readings from ThingSpeak and creates log entities.
+ * Fetches new water level readings from ThingSpeak for each configured sensor.
  */
 function farm_water_level_cron() {
   $config = \Drupal::config('farm_water_level.settings');
@@ -39,94 +39,112 @@ function farm_water_level_cron() {
     return;
   }
 
+  $sensors = $config->get('sensors') ?: [];
+  if (empty($sensors)) {
+    $state->set('farm_water_level.last_sync', $now);
+    return;
+  }
+
   /** @var \Drupal\farm_water_level\ThingSpeakClient $client */
   $client = \Drupal::service('farm_water_level.thingspeak_client');
-  $entries = $client->fetchFeed();
-
-  if (empty($entries)) {
-    $state->set('farm_water_level.last_sync', $now);
-    return;
-  }
-
-  $last_entry_id = (int) $state->get('farm_water_level.last_entry_id', 0);
-  $new_entries = array_filter($entries, function ($entry) use ($last_entry_id) {
-    return !empty($entry['entry_id']) && $entry['entry_id'] > $last_entry_id;
-  });
-
-  if (empty($new_entries)) {
-    $state->set('farm_water_level.last_sync', $now);
-    return;
-  }
-
   $log_storage = \Drupal::entityTypeManager()->getStorage('log');
-  $max_entry_id = $last_entry_id;
+  $quantity_storage = \Drupal::entityTypeManager()->getStorage('quantity');
+  $total_synced = 0;
 
-  foreach ($new_entries as $entry) {
-    $timestamp = strtotime($entry['created_at']);
-    if ($timestamp === FALSE) {
+  foreach ($sensors as $sensor_id => $sensor) {
+    $entries = $client->fetchForSensor($sensor);
+
+    if (empty($entries)) {
       continue;
     }
 
-    $log = $log_storage->create([
-      'type' => 'water_level',
-      'name' => t('Water level reading @time', [
-        '@time' => \Drupal::service('date.formatter')->format($timestamp, 'short'),
-      ]),
-      'timestamp' => $timestamp,
-      'status' => 'done',
-      'notes' => [
-        'value' => t('Auto-synced from ThingSpeak. Entry ID: @id, Value: @val', [
-          '@id' => $entry['entry_id'],
-          '@val' => $entry['value'],
-        ]),
-        'format' => 'default',
-      ],
-    ]);
+    $state_key = 'farm_water_level.last_entry_id.' . $sensor_id;
+    $last_entry_id = (int) $state->get($state_key, 0);
 
-    $quantity_storage = \Drupal::entityTypeManager()->getStorage('quantity');
-    $quantity = $quantity_storage->create([
-      'type' => 'standard',
-      'measure' => 'length',
-      'value' => [
-        'numerator' => (int) ($entry['value'] * 1000),
-        'denominator' => 1000,
-      ],
-      'units' => 'cm',
-      'label' => t('Water level'),
-    ]);
-    $quantity->save();
+    $new_entries = array_filter($entries, function ($entry) use ($last_entry_id) {
+      return !empty($entry['entry_id']) && $entry['entry_id'] > $last_entry_id;
+    });
 
-    $log->set('quantity', [$quantity]);
-    $log->save();
-
-    if ($entry['entry_id'] > $max_entry_id) {
-      $max_entry_id = $entry['entry_id'];
+    if (empty($new_entries)) {
+      continue;
     }
+
+    $max_entry_id = $last_entry_id;
+
+    foreach ($new_entries as $entry) {
+      $timestamp = strtotime($entry['created_at']);
+      if ($timestamp === FALSE) {
+        continue;
+      }
+
+      $log = $log_storage->create([
+        'type' => 'water_level',
+        'name' => t('@sensor @time', [
+          '@sensor' => $sensor['name'],
+          '@time' => \Drupal::service('date.formatter')->format($timestamp, 'short'),
+        ]),
+        'timestamp' => $timestamp,
+        'status' => 'done',
+        'notes' => [
+          'value' => t('Auto-synced from ThingSpeak. Entry ID: @id, Value: @val', [
+            '@id' => $entry['entry_id'],
+            '@val' => $entry['value'],
+          ]),
+          'format' => 'default',
+        ],
+      ]);
+
+      $quantity = $quantity_storage->create([
+        'type' => 'standard',
+        'measure' => 'length',
+        'value' => [
+          'numerator' => (int) ($entry['value'] * 1000),
+          'denominator' => 1000,
+        ],
+        'units' => 'cm',
+        'label' => t('Water level'),
+      ]);
+      $quantity->save();
+
+      $log->set('quantity', [$quantity]);
+      $log->save();
+
+      if ($entry['entry_id'] > $max_entry_id) {
+        $max_entry_id = $entry['entry_id'];
+      }
+      $total_synced++;
+    }
+
+    $state->set($state_key, $max_entry_id);
   }
 
-  $state->set('farm_water_level.last_entry_id', $max_entry_id);
   $state->set('farm_water_level.last_sync', $now);
 
-  \Drupal::logger('farm_water_level')->info('Synced @count new water level readings from ThingSpeak.', [
-    '@count' => count($new_entries),
-  ]);
+  if ($total_synced > 0) {
+    \Drupal::logger('farm_water_level')->info('Synced @count new water level readings from ThingSpeak.', [
+      '@count' => $total_synced,
+    ]);
+  }
 }
 
 /**
  * Implements hook_farm_entity_bundle_field_info().
  */
-function farm_water_level_farm_entity_bundle_field_info() {
+function farm_water_level_farm_entity_bundle_field_info(\Drupal\Core\Entity\EntityTypeInterface $entity_type, string $bundle) {
   $fields = [];
 
-  $fields['log']['water_level']['sensor_depth'] = [
-    'type' => 'fraction',
-    'label' => t('Sensor depth'),
-    'description' => t('The installation depth of the water level sensor.'),
-    'weight' => [
-      'form' => 15,
-      'view' => 15,
-    ],
-  ];
+  if ($entity_type->id() === 'log' && $bundle === 'water_level') {
+    $field_info = [
+      'type' => 'fraction',
+      'label' => t('Sensor depth'),
+      'description' => t('The installation depth of the water level sensor.'),
+      'weight' => [
+        'form' => 15,
+        'view' => 15,
+      ],
+    ];
+    $fields['sensor_depth'] = \Drupal::service('farm_field.factory')->bundleFieldDefinition($field_info);
+  }
 
   return $fields;
 }

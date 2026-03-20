@@ -4,9 +4,10 @@ namespace Drupal\farm_water_level\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 
 /**
- * Configuration form for ThingSpeak water level sensor settings.
+ * Global settings form for the water level sensor module.
  */
 class ThingSpeakSettingsForm extends ConfigFormBase {
 
@@ -30,41 +31,41 @@ class ThingSpeakSettingsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config('farm_water_level.settings');
 
-    $form['thingspeak_channel_id'] = [
+    $form['channel'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('ThingSpeak Channel'),
+    ];
+
+    $form['channel']['thingspeak_channel_id'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('ThingSpeak Channel ID'),
-      '#description' => $this->t('The numeric channel ID from your ThingSpeak channel.'),
+      '#title' => $this->t('Channel ID'),
+      '#description' => $this->t('The numeric channel ID from your ThingSpeak channel. All sensors share this channel.'),
       '#default_value' => $config->get('thingspeak_channel_id'),
       '#required' => TRUE,
     ];
 
-    $form['thingspeak_read_api_key'] = [
+    $form['channel']['thingspeak_read_api_key'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('ThingSpeak Read API Key'),
-      '#description' => $this->t('The Read API key for your ThingSpeak channel. Required for private channels.'),
+      '#title' => $this->t('Read API Key'),
+      '#description' => $this->t('Required for private channels.'),
       '#default_value' => $config->get('thingspeak_read_api_key'),
     ];
 
-    $form['thingspeak_field_number'] = [
-      '#type' => 'number',
-      '#title' => $this->t('Field Number'),
-      '#description' => $this->t('The ThingSpeak field number that contains the water level data (1-8).'),
-      '#default_value' => $config->get('thingspeak_field_number') ?: 1,
-      '#min' => 1,
-      '#max' => 8,
-      '#required' => TRUE,
+    $form['sync'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Sync Settings'),
     ];
 
-    $form['sync_interval'] = [
+    $form['sync']['sync_interval'] = [
       '#type' => 'number',
       '#title' => $this->t('Sync Interval (seconds)'),
-      '#description' => $this->t('How often to pull new readings from ThingSpeak during cron. Default: 3600 (1 hour).'),
+      '#description' => $this->t('How often to pull new readings from ThingSpeak during cron.'),
       '#default_value' => $config->get('sync_interval') ?: 3600,
       '#min' => 60,
       '#required' => TRUE,
     ];
 
-    $form['results_to_fetch'] = [
+    $form['sync']['results_to_fetch'] = [
       '#type' => 'number',
       '#title' => $this->t('Results per Request'),
       '#description' => $this->t('Number of data points to fetch from ThingSpeak per API call.'),
@@ -72,6 +73,59 @@ class ThingSpeakSettingsForm extends ConfigFormBase {
       '#min' => 1,
       '#max' => 8000,
       '#required' => TRUE,
+    ];
+
+    // Sensors table.
+    $sensors = $config->get('sensors') ?: [];
+    $form['sensors_section'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Sensors'),
+      '#description' => $this->t('Each sensor maps to a field (1–8) on the ThingSpeak channel above.'),
+    ];
+
+    if (!empty($sensors)) {
+      $header = [
+        $this->t('Name'),
+        $this->t('Field'),
+        $this->t('Operations'),
+      ];
+      $rows = [];
+      foreach ($sensors as $sensor_id => $sensor) {
+        $rows[] = [
+          $sensor['name'],
+          $sensor['field_number'],
+          [
+            'data' => [
+              '#type' => 'operations',
+              '#links' => [
+                'edit' => [
+                  'title' => $this->t('Edit'),
+                  'url' => Url::fromRoute('farm_water_level.sensor_edit', ['sensor_id' => $sensor_id]),
+                ],
+                'delete' => [
+                  'title' => $this->t('Delete'),
+                  'url' => Url::fromRoute('farm_water_level.sensor_delete', ['sensor_id' => $sensor_id]),
+                ],
+              ],
+            ],
+          ],
+        ];
+      }
+
+      $form['sensors_section']['sensors_table'] = [
+        '#type' => 'table',
+        '#header' => $header,
+        '#rows' => $rows,
+      ];
+    }
+
+    $form['sensors_section']['add_sensor'] = [
+      '#type' => 'link',
+      '#title' => $this->t('+ Add sensor'),
+      '#url' => Url::fromRoute('farm_water_level.sensor_add'),
+      '#attributes' => [
+        'class' => ['button', 'button--primary'],
+      ],
     ];
 
     return parent::buildForm($form, $form_state);
@@ -84,7 +138,6 @@ class ThingSpeakSettingsForm extends ConfigFormBase {
     $this->config('farm_water_level.settings')
       ->set('thingspeak_channel_id', $form_state->getValue('thingspeak_channel_id'))
       ->set('thingspeak_read_api_key', $form_state->getValue('thingspeak_read_api_key'))
-      ->set('thingspeak_field_number', (int) $form_state->getValue('thingspeak_field_number'))
       ->set('sync_interval', (int) $form_state->getValue('sync_interval'))
       ->set('results_to_fetch', (int) $form_state->getValue('results_to_fetch'))
       ->save();

@@ -6,10 +6,42 @@ farm_water_level.settings:
   requirements:
     _permission: 'administer farm_water_level'
 
+farm_water_level.sensor_add:
+  path: '/admin/config/farm/water-level/add'
+  defaults:
+    _form: '\Drupal\farm_water_level\Form\SensorForm'
+    _title: 'Add Sensor'
+  requirements:
+    _permission: 'administer farm_water_level'
+
+farm_water_level.sensor_edit:
+  path: '/admin/config/farm/water-level/{sensor_id}/edit'
+  defaults:
+    _form: '\Drupal\farm_water_level\Form\SensorForm'
+    _title: 'Edit Sensor'
+  requirements:
+    _permission: 'administer farm_water_level'
+
+farm_water_level.sensor_delete:
+  path: '/admin/config/farm/water-level/{sensor_id}/delete'
+  defaults:
+    _form: '\Drupal\farm_water_level\Form\SensorDeleteForm'
+    _title: 'Delete Sensor'
+  requirements:
+    _permission: 'administer farm_water_level'
+
 farm_water_level.dashboard:
   path: '/farm/water-level'
   defaults:
     _controller: '\Drupal\farm_water_level\Controller\WaterLevelController::dashboard'
     _title: 'Water Level'
+  requirements:
+    _permission: 'access content'
+
+farm_water_level.sensor_detail:
+  path: '/farm/water-level/{sensor_id}'
+  defaults:
+    _controller: '\Drupal\farm_water_level\Controller\WaterLevelController::sensorDetail'
+    _title_callback: '\Drupal\farm_water_level\Controller\WaterLevelController::sensorDetailTitle'
   requirements:
     _permission: 'access content'
