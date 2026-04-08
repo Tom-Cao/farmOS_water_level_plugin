@@ -1,5 +1,5 @@
 farm_water_level.settings:
-  path: '/admin/config/farm/water-level'
+  path: '/setup/water-level'
   defaults:
     _form: '\Drupal\farm_water_level\Form\ThingSpeakSettingsForm'
     _title: 'Water Level Sensor Settings'
@@ -7,7 +7,7 @@ farm_water_level.settings:
     _permission: 'administer farm_water_level'
 
 farm_water_level.sensor_add:
-  path: '/admin/config/farm/water-level/add'
+  path: '/setup/water-level/add'
   defaults:
     _form: '\Drupal\farm_water_level\Form\SensorForm'
     _title: 'Add Sensor'
@@ -15,7 +15,7 @@ farm_water_level.sensor_add:
     _permission: 'administer farm_water_level'
 
 farm_water_level.sensor_edit:
-  path: '/admin/config/farm/water-level/{sensor_id}/edit'
+  path: '/setup/water-level/{sensor_id}/edit'
   defaults:
     _form: '\Drupal\farm_water_level\Form\SensorForm'
     _title: 'Edit Sensor'
@@ -23,7 +23,7 @@ farm_water_level.sensor_edit:
     _permission: 'administer farm_water_level'
 
 farm_water_level.sensor_delete:
-  path: '/admin/config/farm/water-level/{sensor_id}/delete'
+  path: '/setup/water-level/{sensor_id}/delete'
   defaults:
     _form: '\Drupal\farm_water_level\Form\SensorDeleteForm'
     _title: 'Delete Sensor'
